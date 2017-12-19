@@ -5,7 +5,7 @@ import scala.collection.mutable.ListBuffer
 
 class CSVParserIterator(stream: Iterator[Char],
                         quotingChar: Char = '\"',
-                        seperator: Char = '\n',
+                        separator: Char = '\n',
                         delimiter: Char = ',') extends Iterator[List[Option[String]]] {
 
   var value = new StringBuilder
@@ -56,9 +56,9 @@ class CSVParserIterator(stream: Iterator[Char],
             quotes = !quotes   // flip quotes state
           }
 
-        case `seperator` =>
+        case `separator` =>
           if (quotes) {        // if inside quoted value, keep to pick up chars
-            value += seperator
+            value += separator
             prevChar = Some(c)
           } else {             // end of row, return row
             row += deserialize_value(value.toString())
