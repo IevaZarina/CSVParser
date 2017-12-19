@@ -8,13 +8,17 @@ class CSVParserIterator(stream: Iterator[Char],
                         seperator: Char = '\n',
                         delimiter: Char = ',') extends Iterator[List[Option[String]]] {
 
+  var value = new StringBuilder
+  var prevChar: Option[Char] = None
+  var row = new ListBuffer[Option[String]]
+  var quotes = false
 
   def deserialize_value(value: String): Option[String] = {
     value match {
       case "" => None
       case v =>
         if (v(0) == quotingChar && v(value.length - 1) == quotingChar)
-          Some(v.stripSuffix(quotingChar.toString).stripPrefix(quotingChar.toString))
+          Some(v.substring(1, value.length - 1))
         else Some(v)
     }
   }
@@ -24,50 +28,50 @@ class CSVParserIterator(stream: Iterator[Char],
   }
 
   def next(): List[Option[String]] = {
-    var value = ""
-    var prevChar = ""
-    var row = new ListBuffer[Option[String]]
-    var quotes = false
+    value.clear()
+    prevChar = None
+    row.clear()
+    quotes = false
 
     while (stream.hasNext) {
       val c = stream.next()
 
       c match {
         case `delimiter` => // might have save to row
-          if (quotes) { // if inside quoted value, keep to pick up chars
+          if (quotes) {     // if inside quoted value, keep picking up chars
             value += delimiter
-            prevChar = delimiter.toString
-          } else { // end of value, save to row
-            row += deserialize_value(value) // add current value
-            value = ""
-            prevChar = ""
+            prevChar = Some(c)
+          } else {          // end of value, save to row
+            row += deserialize_value(value.toString()) // add current value
+            value.clear()
+            prevChar = None
           }
 
         case `quotingChar` =>
-          if (prevChar == "\\") { // if quote was escaped, continue
+          if (prevChar.isDefined && prevChar.get == '\\') { // if quote was escaped, continue
             value += quotingChar
-            prevChar = quotingChar.toString
+            prevChar = Some(c)
           } else {
             value += quotingChar
-            quotes = !quotes // flip quotes state
+            quotes = !quotes   // flip quotes state
           }
 
         case `seperator` =>
-          if (quotes) { // if inside quoted value, keep to pick up chars
+          if (quotes) {        // if inside quoted value, keep to pick up chars
             value += seperator
-            prevChar = seperator.toString
-          } else { // end of row, return row
-            row += deserialize_value(value)
-            return row.toList // yield row
+            prevChar = Some(c)
+          } else {             // end of row, return row
+            row += deserialize_value(value.toString())
+            return row.toList  // yield row
           }
 
         case otherChar =>
           value += otherChar
-          prevChar = otherChar.toString
+          prevChar = Some(c)
 
       }
     }
-    row += deserialize_value(value)
+    row += deserialize_value(value.toString())
 
     row.toList
   }
