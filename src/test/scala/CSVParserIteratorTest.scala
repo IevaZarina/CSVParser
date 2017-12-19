@@ -3,20 +3,55 @@ import csvparser.CSVParserIterator
 
 
 class CSVParserIteratorTest extends FunSuite with Matchers {
-  test("tets CSVParserIterator required cases") {
-    val csv = "abc,\"def\",ghi\nabc,\"de\nf\",ghi\nabc,\"def\",ghi\na,\"b,c,d\",e\na,b,\n\"abc,\"onetwo,three,doremi\n,,\n"
+  test("tets CSVParserIterator newline in value") {
+    val csv = "abc,\"de\nf\",ghi\nabc,\"def\n\",ghi\n\"abc\n,\"onetwo,three,doremi"
 
     val parser = new CSVParserIterator(io.Source.fromString(csv).toBuffer.iterator)
 
     val test_out = parser.toList.map(row => row.map(value => value.getOrElse("None")))
     val real_output = List(
-      List("abc", "def", "ghi"),
       List("abc", "de\nf", "ghi"),
-      List("abc", "def", "ghi"),
-      List("a", "b,c,d", "e"),
-      List("a", "b", "None"),
-      List("\"abc,\"onetwo", "three", "doremi"),
-      List("None", "None", "None"))
+      List("abc", "def\n", "ghi"),
+      List("\"abc\n,\"onetwo", "three", "doremi"))
+
+    assert(real_output === test_out)
+  }
+
+  test("tets CSVParserIterator broken quotes in value") {
+    val csv = "\"abc,\"onetwo,three,doremi"
+
+    val parser = new CSVParserIterator(io.Source.fromString(csv).toBuffer.iterator)
+
+    val test_out = parser.toList.map(row => row.map(value => value.getOrElse("None")))
+    val real_output = List(
+      List("\"abc,\"onetwo", "three", "doremi"))
+
+    assert(real_output === test_out)
+  }
+
+  test("tets CSVParserIterator empty values") {
+    val csv = ",,\naaa,,\n,,aaa"
+
+    val parser = new CSVParserIterator(io.Source.fromString(csv).toBuffer.iterator)
+
+    val test_out = parser.toList.map(row => row.map(value => value.getOrElse("None")))
+    val real_output = List(
+      List("None", "None", "None"),
+      List("aaa", "None", "None"),
+      List("None", "None", "aaa"))
+
+    assert(real_output === test_out)
+  }
+
+  test("tets CSVParserIterator quoted value") {
+    val csv = "abc,\"a,b,c\",c"
+
+    val parser = new CSVParserIterator(io.Source.fromString(csv).toBuffer.iterator)
+
+    val test_out = parser.toList.map(row => row.map(value => value.getOrElse("None")))
+    val real_output = List(
+      List("abc", "a,b,c", "c"),
+     )
 
     assert(real_output === test_out)
   }
@@ -47,7 +82,7 @@ class CSVParserIteratorTest extends FunSuite with Matchers {
     val parser = new CSVParserIterator(
       io.Source.fromString(csv).toBuffer.iterator,
       quotingChar = '`',
-      seperator = '~')
+      separator = '~')
 
     val test_out = parser.toList.map(row => row.map(value => value.getOrElse("None")))
     val real_output = List(
@@ -62,13 +97,13 @@ class CSVParserIteratorTest extends FunSuite with Matchers {
     assert(real_output === test_out)
   }
 
-  test("tets CSVParserIterator delimiter \t ") {
+  test("tets CSVParserIterator delimiter \\t ") {
     val csv = "abc\t`def`\tghi~abc\t`de~f`\tghi~abc\t`def`\tghi~a\t`b\tc\td`\te~a\tb\t~`abc\t`onetwo\tthree\tdoremi~\t\t~"
 
     val parser = new CSVParserIterator(
       io.Source.fromString(csv).toBuffer.iterator,
       quotingChar = '`',
-      seperator = '~',
+      separator = '~',
       delimiter = '\t')
 
     val test_out = parser.toList.map(row => row.map(value => value.getOrElse("None")))
@@ -81,7 +116,6 @@ class CSVParserIteratorTest extends FunSuite with Matchers {
       List("`abc\t`onetwo", "three", "doremi"),
       List("None", "None", "None"))
 
-    println(test_out.mkString("\n"))
     assert(real_output === test_out)
   }
 
