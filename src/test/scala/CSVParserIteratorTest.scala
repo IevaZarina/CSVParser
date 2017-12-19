@@ -96,6 +96,4 @@ class CSVParserIteratorTest extends FunSuite with Matchers {
     assert(real_output === test_out)
   }
 
-
-
 }
