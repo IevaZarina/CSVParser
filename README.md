@@ -15,7 +15,7 @@ sbt package
 ```
 
 Run the project .jar file from the command line. 
-It takes in parameter with the path to your CSV file.
+It takes in a parameter with the path to your CSV file.
 
 ```
 scala target/scala-2.12/csvparser_2.12-0.1.jar src/test/resources/input.csv
@@ -50,7 +50,7 @@ for i in `seq 1 13`; do
 done
 ```
 
-Generated file is 157 MB with 12.75 million rows
+Generated file is 157 MB with 12.75 million rows.
 
 ```
 $ ls -lh large.csv
