@@ -7,9 +7,21 @@ object CSVParsingExample {
       println("Missing CSV file path parameter!")
       return
     }
-    val filename = args(0)
 
-    val parser = new CSVParserIterator(io.Source.fromFile(filename).iter)
+    if (args.length > 1 && args.length < 4) {
+      println("Please provide all parsing characters: [quotingChar] [seperator] [delimiter]. The dafault values are: \" \\n ,")
+      return
+    }
+
+    val filename = args(0)
+    val parser = args.length match {
+      case 1 => new CSVParserIterator(io.Source.fromFile(filename).iter)
+      case 4 => new CSVParserIterator(io.Source.fromFile(filename).iter,
+        quotingChar = args(1)(0),
+        seperator = args(2)(0),
+        delimiter = args(3)(0))
+    }
+
     for (row <- parser) println(row.map(value => value.getOrElse("None")).mkString(", "))
   }
 

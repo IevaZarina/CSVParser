@@ -22,3 +22,19 @@ scala target/scala-2.12/csvparser_2.12-0.1.jar src/test/resources/input.csv
 ```
 
 You should see output in your terminal.
+
+Optionally you can set the
+ ```quotingChar``` 
+ ```seperator```
+ ```delimiter``` characters. 
+They default to:
+
+* ```quotingChar```: "
+* ```seperator```: \n
+* ```delimiter```: ,
+ 
+
+ ```
+ scala target/scala-2.12/csvparser_2.12-0.1.jar src/test/resources/input.csv " \n ,
+ ```
+ 
