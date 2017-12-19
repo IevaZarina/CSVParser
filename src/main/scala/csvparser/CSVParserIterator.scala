@@ -8,9 +8,9 @@ class CSVParserIterator(stream: Iterator[Char],
                         separator: Char = '\n',
                         delimiter: Char = ',') extends Iterator[List[Option[String]]] {
 
-  var value = new StringBuilder
+  val value = new StringBuilder
+  val row = new ListBuffer[Option[String]]
   var prevChar: Option[Char] = None
-  var row = new ListBuffer[Option[String]]
   var quotes = false
 
   def deserialize_value(value: String): Option[String] = {
